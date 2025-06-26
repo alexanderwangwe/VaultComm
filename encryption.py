@@ -3,48 +3,35 @@ from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
 import base64
 
-BLOCK_SIZE = 16  # AES block size (bytes)
-
-def format_key(key: str) -> bytes:
-    """
-    Formats the key to ensure it is exactly 16 bytes (AES-128).
-    Pads with zeros if too short, trims if too long.
-    """
-    return key.ljust(16, '0').encode('utf-8')[:16]
+BLOCK_SIZE = 16  # AES block size in bytes
 
 def encrypt_message(message: str, key: str) -> str:
-    """
-    Encrypts a plaintext message using AES with the provided key.
-    Returns the base64-encoded string (IV + ciphertext).
-    """
-    key = format_key(key)
-    iv = get_random_bytes(BLOCK_SIZE)
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    ciphertext = cipher.encrypt(pad(message.encode('utf-8'), BLOCK_SIZE))
-    return base64.b64encode(iv + ciphertext).decode('utf-8')
+    try:
+        key = key[:16].encode('utf-8')  # Ensure 16-byte key
+        iv = get_random_bytes(BLOCK_SIZE)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        ciphertext = cipher.encrypt(pad(message.encode('utf-8'), BLOCK_SIZE))
+        return base64.b64encode(iv + ciphertext).decode('utf-8')
+    except Exception as e:
+        print("❌ Encryption failed:", e)
+        raise ValueError("Encryption failed. Please try again.")
 
 def decrypt_message(encoded_data: str, key: str) -> str:
-    """
-    Decrypts a base64-encoded AES-encrypted message using the provided key.
-    Returns the original plaintext.
-    """
-    key = format_key(key)
-    data = base64.b64decode(encoded_data)
-    iv = data[:BLOCK_SIZE]
-    ciphertext = data[BLOCK_SIZE:]
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    plaintext = unpad(cipher.decrypt(ciphertext), BLOCK_SIZE)
-    return plaintext.decode('utf-8')
+    try:
+        key = key[:16].encode('utf-8')  # Ensure 16-byte key
+        data = base64.b64decode(encoded_data)
 
+        if len(data) < 32:
+            raise ValueError("Encrypted data too short to contain IV + ciphertext.")
 
-# Example usage
-if __name__ == "__main__":
-    key = "mysecretotp1234"  # Even if short, it'll be padded safely
+        iv = data[:16]
+        ciphertext = data[16:]
 
-    msg = "Hello from VaultComm!"
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        plaintext = unpad(cipher.decrypt(ciphertext), BLOCK_SIZE)
 
-    encrypted = encrypt_message(msg, key)
-    print("Encrypted:", encrypted)
+        return plaintext.decode('utf-8')
 
-    decrypted = decrypt_message(encrypted, key)
-    print("Decrypted:", decrypted)
+    except (ValueError, KeyError, base64.binascii.Error) as e:
+        print("❌ Decryption failed:", e)
+        raise ValueError("Decryption failed: Check if OTP and message are correct.")

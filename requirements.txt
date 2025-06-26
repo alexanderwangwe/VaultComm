@@ -1,0 +1,2 @@
+africastalking~=1.2.9
+pycryptodome~=3.23.0

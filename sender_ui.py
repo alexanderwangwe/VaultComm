@@ -4,50 +4,56 @@ from encryption import encrypt_message
 from otp_sender import generate_otp, send_otp_via_sms
 
 # Appearance and theme
-ctk.set_appearance_mode("Light")  # "Light", "Dark", or "System"
+ctk.set_appearance_mode("Light")
 ctk.set_default_color_theme("dark-blue")
 
 class SenderApp:
     def __init__(self, root):
         self.root = root
         root.title("VaultComm - Sender")
-        root.geometry("640x620")
+        root.geometry("700x700")
         root.grid_columnconfigure(0, weight=1)
+        root.grid_rowconfigure(0, weight=1)
 
-        padding_y = 10  # consistent vertical spacing
+        # Card frame (the "card" look)
+        self.card = ctk.CTkFrame(root, corner_radius=18, border_width=2, border_color="#2a2d2e")
+        self.card.grid(row=0, column=0, padx=40, pady=40, sticky="nsew")
+        self.card.grid_columnconfigure(0, weight=1)
+
+        padding_y = 10
 
         # Title
-        ctk.CTkLabel(root, text="VaultComm Encryption Console", font=("Arial", 20, "bold")).grid(row=0, column=0, pady=(20, 10))
+        ctk.CTkLabel(self.card, text="VaultComm Encryption Console", font=("Arial", 20, "bold")).grid(row=0, column=0, pady=(20, 10))
 
         # Phone number input
-        ctk.CTkLabel(root, text="Receiver Phone Number:", anchor="w").grid(row=1, column=0, sticky="ew", padx=20)
-        self.phone_entry = ctk.CTkEntry(root, width=300, placeholder_text="+2547XXXXXXXX")
+        ctk.CTkLabel(self.card, text="Enter Receiver Phone Number:", anchor="w").grid(row=1, column=0, sticky="ew", padx=20)
+        self.phone_entry = ctk.CTkEntry(self.card, width=300, placeholder_text="+2547XXXXXXXX")
         self.phone_entry.insert(0, "+254700000000")
         self.phone_entry.grid(row=2, column=0, pady=(0, padding_y), padx=20, sticky="ew")
 
         # Message input
-        ctk.CTkLabel(root, text="Message to Encrypt:", anchor="w").grid(row=3, column=0, sticky="ew", padx=20)
-        self.msg_input = ctk.CTkTextbox(root, height=80)
+        ctk.CTkLabel(self.card, text="Message to Encrypt:", anchor="w").grid(row=3, column=0, sticky="ew", padx=20)
+        self.msg_input = ctk.CTkTextbox(self.card, height=80)
         self.msg_input.grid(row=4, column=0, pady=(0, padding_y), padx=20, sticky="ew")
 
         # Encrypt button
-        ctk.CTkButton(root, text="Encrypt Message", command=self.encrypt_msg).grid(row=5, column=0, pady=(0, padding_y), padx=20)
+        ctk.CTkButton(self.card, text="Encrypt Message", command=self.encrypt_msg).grid(row=5, column=0, pady=(0, padding_y), padx=20)
 
         # OTP Label
-        self.otp_label = ctk.CTkLabel(root, text="OTP Key: ", anchor="w")
+        self.otp_label = ctk.CTkLabel(self.card, text="OTP Key: ", anchor="w")
         self.otp_label.grid(row=6, column=0, sticky="ew", padx=20, pady=(0, 5))
 
         # Send SMS button
-        ctk.CTkButton(root, text="Send OTP via SMS", command=self.send_otp_sms).grid(row=7, column=0, pady=(0, padding_y), padx=20)
+        ctk.CTkButton(self.card, text="Send OTP via SMS", command=self.send_otp_sms).grid(row=7, column=0, pady=(0, padding_y), padx=20)
 
         # Encrypted message display
-        ctk.CTkLabel(root, text="Encrypted Message (Cipher Text):", anchor="w").grid(row=8, column=0, sticky="ew", padx=20)
-        self.encrypted_output = ctk.CTkTextbox(root, height=80)
+        ctk.CTkLabel(self.card, text="Encrypted Message (Cipher Text):", anchor="w").grid(row=8, column=0, sticky="ew", padx=20)
+        self.encrypted_output = ctk.CTkTextbox(self.card, height=80)
         self.encrypted_output.grid(row=9, column=0, pady=(0, padding_y), padx=20, sticky="ew")
 
         # Copy buttons
-        ctk.CTkButton(root, text="Copy Encrypted Text", command=self.copy_encrypted).grid(row=10, column=0, pady=(0, 5), padx=20)
-        ctk.CTkButton(root, text="Copy OTP", command=self.copy_otp).grid(row=11, column=0, pady=(0, 20), padx=20)
+        ctk.CTkButton(self.card, text="Copy Encrypted Text", command=self.copy_encrypted).grid(row=10, column=0, pady=(0, 5), padx=20)
+        ctk.CTkButton(self.card, text="Copy OTP", command=self.copy_otp).grid(row=11, column=0, pady=(0, 20), padx=20)
 
         self.generated_otp = ""
         self.encryption_success = False

@@ -63,8 +63,13 @@ To test the application:
 5. Run `receiver_ui.py`, paste the encrypted message and OTP.
 6. Click "Decrypt Message" to view the original message.
 
+Note : that this runs as a demo and thus uses Africa's talking sandbox mode(sms is viewed in the simulator).
 If you want to test without SMS, manually copy the OTP from the sender UI to the receiver UI.
 
 ---
+![Screenshot 2025-06-28 140536](https://github.com/user-attachments/assets/7650a728-c043-41c9-bf16-61360056da7e)
+<img width="478" alt="image" src="https://github.com/user-attachments/assets/f2af799a-118d-4ecb-aa49-f958de7e9707" />
+
+
 
 **Note:** This project is for educational purposes. Do not use in production without proper security review.

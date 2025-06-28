@@ -1,41 +1,56 @@
-import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
 from encryption import decrypt_message
+
+# Theme & Appearance
+ctk.set_appearance_mode("Light")  # Light, Dark, or System
+ctk.set_default_color_theme("dark-blue")  # Consistent with Sender
 
 class ReceiverApp:
     def __init__(self, root):
         self.root = root
         root.title("VaultComm - Receiver")
-        root.geometry("600x500")
-        root.config(padx=20, pady=20)
+        root.geometry("640x540")
+        root.grid_columnconfigure(0, weight=1)
 
-        tk.Label(root, text="Enter Encrypted Text:").pack()
-        self.encrypted_input = tk.Text(root, height=4)
-        self.encrypted_input.pack()
+        padding_y = 10
 
-        tk.Button(root, text="Paste Encrypted Text from Clipboard", command=self.paste_encrypted).pack(pady=5)
+        # Title
+        ctk.CTkLabel(root, text="VaultComm Decryption Console", font=("Arial", 20, "bold")).grid(row=0, column=0, pady=(20, 10))
 
-        tk.Label(root, text="Enter OTP Key:").pack()
-        self.otp_input = tk.Entry(root)
-        self.otp_input.pack()
+        # Encrypted Text Input
+        ctk.CTkLabel(root, text="Enter Encrypted Text:", anchor="w").grid(row=1, column=0, sticky="ew", padx=20)
+        self.encrypted_input = ctk.CTkTextbox(root, height=80)
+        self.encrypted_input.grid(row=2, column=0, pady=(0, padding_y), padx=20, sticky="ew")
 
-        tk.Button(root, text="Paste OTP from Clipboard", command=self.paste_otp).pack(pady=5)
+        ctk.CTkButton(root, text="Paste Encrypted Text from Clipboard", command=self.paste_encrypted).grid(row=3, column=0, pady=(0, padding_y), padx=20)
 
-        tk.Button(root, text="Decrypt Message", command=self.decrypt_msg).pack(pady=5)
-        tk.Label(root, text="Decrypted Message:").pack()
-        self.decrypted_output = tk.Text(root, height=3)
-        self.decrypted_output.pack()
+        # OTP Input
+        ctk.CTkLabel(root, text="Enter OTP Key:", anchor="w").grid(row=4, column=0, sticky="ew", padx=20)
+        self.otp_input = ctk.CTkEntry(root)
+        self.otp_input.grid(row=5, column=0, pady=(0, padding_y), padx=20, sticky="ew")
 
-        self.status_label = tk.Label(root, text="", fg="green")
-        self.status_label.pack(pady=5)
+        ctk.CTkButton(root, text="Paste OTP from Clipboard", command=self.paste_otp).grid(row=6, column=0, pady=(0, padding_y), padx=20)
+
+        # Decrypt Button
+        ctk.CTkButton(root, text="Decrypt Message", command=self.decrypt_msg).grid(row=7, column=0, pady=(0, padding_y), padx=20)
+
+        # Decrypted Message Display
+        ctk.CTkLabel(root, text="Decrypted Message:", anchor="w").grid(row=8, column=0, sticky="ew", padx=20)
+        self.decrypted_output = ctk.CTkTextbox(root, height=60)
+        self.decrypted_output.grid(row=9, column=0, pady=(0, padding_y), padx=20, sticky="ew")
+
+        # Status Log
+        self.status_label = ctk.CTkLabel(root, text="", text_color="green")
+        self.status_label.grid(row=10, column=0, pady=(5, 20))
 
     def decrypt_msg(self):
-        cipher_text = self.encrypted_input.get("1.0", tk.END).strip()
+        cipher_text = self.encrypted_input.get("1.0", "end").strip()
         otp = self.otp_input.get().strip()
-        self.status_label.config(text="", fg="green")
+        self.status_label.configure(text="", text_color="green")
 
         if not cipher_text or not otp:
-            messagebox.showerror("Missing Input", "Both OTP and message are required.")
+            messagebox.showerror("Missing Input", "Both OTP and encrypted message are required.")
             return
 
         if len(cipher_text) < 32:
@@ -44,33 +59,32 @@ class ReceiverApp:
 
         try:
             decrypted = decrypt_message(cipher_text, otp)
-            self.decrypted_output.delete("1.0", tk.END)
-            self.decrypted_output.insert(tk.END, decrypted)
-            self.status_label.config(text="✅ Message decrypted successfully.", fg="green")
+            self.decrypted_output.delete("1.0", "end")
+            self.decrypted_output.insert("end", decrypted)
+            self.status_label.configure(text="✅ Message decrypted successfully.", text_color="green")
             messagebox.showinfo("Success", "Message decrypted successfully!")
-
         except Exception as e:
-            self.decrypted_output.delete("1.0", tk.END)
-            self.status_label.config(text="❌ Decryption failed.", fg="red")
+            self.decrypted_output.delete("1.0", "end")
+            self.status_label.configure(text="❌ Decryption failed.", text_color="red")
             messagebox.showerror("Decryption Failed", f"Decryption failed.\n\nDetails:\n{str(e)}")
 
     def paste_encrypted(self):
         try:
             clipboard_text = self.root.clipboard_get()
-            self.encrypted_input.delete("1.0", tk.END)
-            self.encrypted_input.insert(tk.END, clipboard_text)
+            self.encrypted_input.delete("1.0", "end")
+            self.encrypted_input.insert("end", clipboard_text)
         except Exception:
             messagebox.showerror("Clipboard Error", "Failed to read from clipboard.")
 
     def paste_otp(self):
         try:
             clipboard_text = self.root.clipboard_get()
-            self.otp_input.delete(0, tk.END)
+            self.otp_input.delete(0, "end")
             self.otp_input.insert(0, clipboard_text)
         except Exception:
             messagebox.showerror("Clipboard Error", "Failed to read OTP from clipboard.")
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ctk.CTk()
     app = ReceiverApp(root)
     root.mainloop()
